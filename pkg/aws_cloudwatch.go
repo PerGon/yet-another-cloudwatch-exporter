@@ -170,7 +170,7 @@ func determineGetMetricDataWindow(clock Clock, roundingPeriod time.Duration, len
 	return startTime, endTime
 }
 
-func createListMetricsInput(dimensions []*cloudwatch.Dimension, namespace *string, metricsName *string) (output *cloudwatch.ListMetricsInput) {
+func createListMetricsInput(dimensions []*cloudwatch.Dimension, namespace *string, metricsName *string, RecentlyActiveOnly bool) (output *cloudwatch.ListMetricsInput) {
 	var dimensionsFilter []*cloudwatch.DimensionFilter
 
 	for _, dim := range dimensions {
@@ -178,13 +178,24 @@ func createListMetricsInput(dimensions []*cloudwatch.Dimension, namespace *strin
 			dimensionsFilter = append(dimensionsFilter, &cloudwatch.DimensionFilter{Name: dim.Name, Value: dim.Value})
 		}
 	}
-	output = &cloudwatch.ListMetricsInput{
-		MetricName: metricsName,
-		Dimensions: dimensionsFilter,
-		Namespace:  namespace,
-		NextToken:  nil,
+
+	if !RecentlyActiveOnly {
+		return &cloudwatch.ListMetricsInput{
+			MetricName: metricsName,
+			Dimensions: dimensionsFilter,
+			Namespace:  namespace,
+			NextToken:  nil,
+		}
 	}
-	return output
+
+	recentlyActiveString := "PT3H"
+	return &cloudwatch.ListMetricsInput{
+		MetricName:     metricsName,
+		Dimensions:     dimensionsFilter,
+		Namespace:      namespace,
+		NextToken:      nil,
+		RecentlyActive: &recentlyActiveString,
+	}
 }
 
 func dimensionsToCliString(dimensions []*cloudwatch.Dimension) (output string) {
@@ -255,9 +266,9 @@ func createStaticDimensions(dimensions []Dimension) (output []*cloudwatch.Dimens
 	return output
 }
 
-func getFullMetricsList(ctx context.Context, namespace string, metric *Metric, clientCloudwatch cloudwatchInterface) (resp *cloudwatch.ListMetricsOutput, err error) {
+func getFullMetricsList(ctx context.Context, namespace string, metric *Metric, clientCloudwatch cloudwatchInterface, RecentlyActiveOnly bool) (resp *cloudwatch.ListMetricsOutput, err error) {
 	c := clientCloudwatch.client
-	filter := createListMetricsInput(nil, &namespace, &metric.Name)
+	filter := createListMetricsInput(nil, &namespace, &metric.Name, RecentlyActiveOnly)
 	var res cloudwatch.ListMetricsOutput
 	err = c.ListMetricsPagesWithContext(ctx, filter,
 		func(page *cloudwatch.ListMetricsOutput, lastPage bool) bool {

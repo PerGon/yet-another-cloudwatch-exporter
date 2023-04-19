@@ -227,7 +227,7 @@ func getMetricDataForQueries(
 		// of dimensions and value of dimensions with data
 		tagSemaphore <- struct{}{}
 
-		metricsList, err := getFullMetricsList(ctx, svc.Namespace, metric, clientCloudwatch)
+		metricsList, err := getFullMetricsList(ctx, svc.Namespace, metric, clientCloudwatch, discoveryJob.RecentlyActiveOnly)
 		<-tagSemaphore
 
 		if err != nil {
@@ -400,7 +400,7 @@ func getMetricDataForQueriesForCustomNamespace(
 		// of dimensions and value of dimensions with data
 		tagSemaphore <- struct{}{}
 
-		metricsList, err := getFullMetricsList(ctx, customNamespaceJob.Namespace, metric, clientCloudwatch)
+		metricsList, err := getFullMetricsList(ctx, customNamespaceJob.Namespace, metric, clientCloudwatch, customNamespaceJob.RecentlyActiveOnly)
 		<-tagSemaphore
 
 		if err != nil {

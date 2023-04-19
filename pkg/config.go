@@ -43,6 +43,7 @@ type Job struct {
 	Statistics                []string  `yaml:"statistics"`
 	AddCloudwatchTimestamp    *bool     `yaml:"addCloudwatchTimestamp"`
 	NilToZero                 *bool     `yaml:"nilToZero"`
+	RecentlyActiveOnly        bool      `yaml:"recentlyActiveOnly"`
 }
 
 type Static struct {
@@ -70,6 +71,7 @@ type CustomNamespace struct {
 	CustomTags                []Tag     `yaml:"customTags"`
 	DimensionNameRequirements []string  `yaml:"dimensionNameRequirements"`
 	RoundingPeriod            *int64    `yaml:"roundingPeriod"`
+	RecentlyActiveOnly        bool      `yaml:"recentlyActiveOnly"`
 }
 
 type Role struct {
